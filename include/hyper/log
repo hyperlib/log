@@ -1,0 +1,106 @@
+// <hyperscale/logger> -*- C++ -*-
+
+/**
+ * Hyperscale
+ *
+ * (c) 2015-2017 Axel Etcheverry
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+#pragma once
+
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace hyper::log {
+
+enum LevelType {
+    LEVEL_DEBUG = 0,
+    LEVEL_INFO = 1,
+    LEVEL_NOTICE = 2,
+    LEVEL_WARNING = 3,
+    LEVEL_ERROR = 4,
+    LEVEL_CRITICAL = 5,
+    LEVEL_ALERT = 6,
+    LEVEL_EMERGENCY = 7
+};
+
+class LoggerInterface {
+   public:
+    virtual LevelType getLevel() const = 0;
+    virtual void log(LevelType level_, const std::string message_, va_list list_) = 0;
+};
+}
+
+namespace hyperscale {
+class Logger {
+   private:
+    static std::vector<std::unique_ptr<log::LoggerInterface>> loggers;
+
+    void log(LevelType level_, const std::string message_, va_list list_);
+
+   public:
+    /**
+     * Add logger
+     */
+    static void addLogger(std::unique_ptr<log::LoggerInterface> logger_);
+
+    /**
+     * System is unusable.
+     */
+    static void emergency(const std::string message_, ...);
+
+    /**
+     * Action must be taken immediately.
+     *
+     * Example: Entire website down, database unavailable, etc. This should
+     * trigger the SMS alerts and wake you up.
+     */
+    static void alert(const std::string message_, ...);
+
+    /**
+     * Critical conditions.
+     *
+     * Example: Application component unavailable, unexpected exception.
+     */
+    static void critical(const std::string message_, ...);
+
+    /**
+     * Runtime errors that do not require immediate action but should typically
+     * be logged and monitored.
+     */
+    static void error(const std::string message_, ...);
+
+    /**
+     * Exceptional occurrences that are not errors.
+     *
+     * Example: Use of deprecated APIs, poor use of an API, undesirable things
+     * that are not necessarily wrong.
+     */
+    static void warning(const std::string message_, ...);
+
+    /**
+     * Normal but significant events.
+     */
+    static void notice(const std::string message_, ...);
+
+    /**
+     * Interesting events.
+     *
+     * Example: User logs in, SQL logs.
+     */
+    static void info(const std::string message_, ...);
+
+    /**
+     * Detailed debug information.
+     */
+    static void debug(const std::string message_, ...);
+
+    /**
+     * Logs with an arbitrary level.
+     */
+    static void log(LevelType level_, const std::string message_, ...);
+}
+}
